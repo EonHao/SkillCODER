@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skillcoder-core"
+dynamic = ["version"]
+description = "Model-assisted semantic watermarking and buyer attribution for agent skills"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+keywords = ["agent", "skill", "watermark", "fingerprinting", "provenance"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Security",
+]
+dependencies = [
+  "openai>=1.55.3,<3",
+]
+
+[project.optional-dependencies]
+camel = ["camel-ai>=0.2.90,<0.3", "mcp>=1.3,<2"]
+langchain = ["langchain-openai>=1.0,<2"]
+test = ["build>=1,<2", "mypy>=1.13,<2", "pytest>=8,<9"]
+
+[project.scripts]
+skillcoder = "skillcoder.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["skillcoder*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "skillcoder.__version__"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]
+
+[[tool.mypy.overrides]]
+module = ["camel.*", "langchain_core.*", "langchain_openai.*"]
+ignore_missing_imports = true

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(done:*)",
+      "WebSearch",
+      "WebFetch",
+      "mcp__exa__web_search_exa"
+    ]
+  }
+}

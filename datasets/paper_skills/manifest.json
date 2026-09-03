@@ -1,0 +1,97 @@
+{
+  "dataset_id": "skillcoder-paper-skills",
+  "schema_version": 1,
+  "paper": {
+    "title": "SkillCODER: Towards Auditing and Attribution of Copyright Infringement in LLM Agent Skills",
+    "source_reference": "companion paper",
+    "dataset_definition": "Section 4.1 and Appendix E",
+    "main_study_skill_count": 6,
+    "domains": [
+      "code_review",
+      "data_science",
+      "travel_planning"
+    ]
+  },
+  "entries": [
+    {
+      "id": "generated-code-review",
+      "domain": "code_review",
+      "kind": "generated",
+      "prompt_path": "generated/code_review/PROMPT.md",
+      "artifact_status": "reproduction_required",
+      "paper_output_available": false
+    },
+    {
+      "id": "trailofbits-differential-review",
+      "domain": "code_review",
+      "kind": "real_world",
+      "path": "real_world/code_review/differential-review",
+      "entrypoint": "SKILL.md",
+      "source_url": "https://github.com/trailofbits/skills",
+      "paper_accessed": "2026-04",
+      "commit": "540111a52a2b76009fb279fed2b8f5d3eaa97adc",
+      "commit_time": "2026-04-28T21:12:06-04:00",
+      "source_subtree": "plugins/differential-review/skills/differential-review",
+      "source_tree": "90210497beddff346abd4fd43175a2702adb37a5",
+      "license": "CC-BY-SA-4.0",
+      "license_path": "licenses/trailofbits-skills/LICENSE",
+      "artifact_status": "imported_exact"
+    },
+    {
+      "id": "generated-data-science",
+      "domain": "data_science",
+      "kind": "generated",
+      "prompt_path": "generated/data_science/PROMPT.md",
+      "artifact_status": "reproduction_required",
+      "paper_output_available": false
+    },
+    {
+      "id": "csv-data-summarizer",
+      "domain": "data_science",
+      "kind": "real_world",
+      "path": "real_world/data_science/csv-data-summarizer",
+      "entrypoint": "SKILL.md",
+      "source_url": "https://github.com/coffeefuelbump/csv-data-summarizer-claude-skill",
+      "paper_accessed": "2026-04",
+      "commit": "9b3affd270f85aaf1c8a7a457f510034d5736cde",
+      "commit_time": "2025-10-16T13:20:05-07:00",
+      "source_tree": "968cd3433a26e13544845dcbcb5bb67c89c86065",
+      "license": "MIT (declared in README; LICENSE file absent)",
+      "artifact_status": "imported_exact"
+    },
+    {
+      "id": "generated-travel-planning",
+      "domain": "travel_planning",
+      "kind": "generated",
+      "prompt_path": "generated/travel_planning/PROMPT.md",
+      "artifact_status": "reproduction_required",
+      "paper_output_available": false
+    },
+    {
+      "id": "erlebnisw-travel-planner",
+      "domain": "travel_planning",
+      "kind": "real_world",
+      "path": "real_world/travel_planning/travel-planner",
+      "entrypoint": "SKILL.md",
+      "source_url": "https://github.com/ErlebnisW/travel-planner",
+      "paper_accessed": "2026-04",
+      "commit": "a7a43cc811ac723566d68c3985bc19920dc95000",
+      "commit_time": "2026-02-02T18:31:38+01:00",
+      "source_tree": "e0eb1f542f93ca4182e3196bce5082902347a898",
+      "license": "MIT",
+      "license_path": "real_world/travel_planning/travel-planner/LICENSE",
+      "artifact_status": "imported_exact"
+    }
+  ],
+  "generator_reference": {
+    "source_url": "https://github.com/anthropics/skills",
+    "paper_cited_accessed": "2025-06",
+    "public_repository_first_commit": "2025-10-15T17:07:32-04:00",
+    "snapshot_policy": "latest public commit before PDF creation",
+    "commit": "f6656c1256d5a8adfa37db9110046ef20bac644c",
+    "commit_time": "2026-08-13T11:09:54-07:00",
+    "source_subtree": "skills/skill-creator",
+    "license": "Apache-2.0",
+    "temporal_match_to_paper_citation": false
+  }
+}

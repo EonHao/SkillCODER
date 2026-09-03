@@ -1,0 +1,12 @@
+[
+  "Prepare a review request for a caching refactor and list the minimum evidence the reviewer needs.",
+  "Explain how to triage a possible authentication regression before merge.",
+  "Turn a partial test report into a concise code-review handoff without inventing results.",
+  "Help two reviewers resolve whether a performance concern is a release blocker.",
+  "Review a database migration change when the rollback evidence is incomplete.",
+  "Summarize the security checks needed before merging a new file-upload endpoint.",
+  "Identify gaps in the tests for a command-line option that changes output formatting.",
+  "Prepare a handoff for reviewing a dependency upgrade with uncertain compatibility impact.",
+  "Assess whether an observability-only change has enough evidence for release.",
+  "Explain the next review step when the proposed base revision cannot be confirmed."
+]
