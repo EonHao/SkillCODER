@@ -64,6 +64,10 @@ class DomainLanguageExhausted(ValueError):
         super().__init__(self.public_message)
 
 
+class _CarrierFusionExhausted(RuntimeError):
+    """Raised after bounded carrier-generation attempts produce no valid output."""
+
+
 @dataclass(frozen=True)
 class WatermarkPlan:
     markdown: str
@@ -1301,39 +1305,12 @@ def _fuse(
             "format_attempts": format_attempt,
             "format_failures": format_failures,
             "used_previous_candidate": previous_candidate is not None,
-            "fallback_used": False,
             "model_call": completion.audit,
         }
-    fallback_word_count = len(
-        re.findall(r"[a-z0-9]+(?:-[a-z0-9]+)*", encoded_requirement.casefold())
+    final_failure = format_failures[-1] if format_failures else "unknown validation failure"
+    raise _CarrierFusionExhausted(
+        "carrier fusion failed template validation after 3 attempts: " + final_failure
     )
-    if fallback_word_count > maximum_addition_words:
-        raise ValueError(
-            "carrier fusion failed template validation after 3 attempts and the trusted "
-            f"requirement exceeds the word budget: {fallback_word_count}>{maximum_addition_words}"
-        )
-    addition = encoded_requirement
-    for value, placeholder in placeholder_by_value.items():
-        addition = addition.replace(placeholder, value)
-    fused = f"{source}\n{addition}"
-    source_tokens = _tokens(source)
-    recall = len(source_tokens & _tokens(fused)) / max(1, len(source_tokens))
-    return fused, {
-        "round": round_index,
-        "source_token_recall": recall,
-        "source_transport": "deterministic_join",
-        "addition_placement": "after",
-        "protected_transport": {
-            placeholder: "trusted_requirement_fallback"
-            for placeholder in placeholder_by_value.values()
-        },
-        "template": "protected_requirement_fallback",
-        "format_attempts": 3,
-        "format_failures": format_failures,
-        "used_previous_candidate": previous_candidate is not None,
-        "fallback_used": True,
-        "model_call": completion.audit,
-    }
 
 
 def _prepare_slot_templates(
@@ -2274,6 +2251,8 @@ def _optimize_fidelity(
                     f"The previous complete candidate failed deterministic surface validation: "
                     f"{surface_failure}. {revision_guidance}"
                 )
+        except _CarrierFusionExhausted:
+            raise
         except (RuntimeError, ValueError) as exc:
             last_failure = str(exc)
             round_records.append(

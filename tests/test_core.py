@@ -40,7 +40,7 @@ from skillcoder.pipeline import (
     verify_release_manifest,
 )
 from skillcoder.querygen import generate_matched_probe_pairs, generate_normal_queries
-from skillcoder.semantic import parse_semantic_nodes, replace_exact
+from skillcoder.semantic import parse_skill_ir, replace_exact
 from skillcoder.targets import (
     CamelSkillTarget,
     LangChainSkillTarget,
@@ -310,9 +310,23 @@ class ContractModelFixture:
                 {"purpose": purpose},
             )
         if purpose == "carrier_fusion":
-            requirement = json.loads(re.search(r"REQUIREMENT_JSON: (.*)\nPROTECTED_JSON", user).group(1))
+            requirement = json.loads(
+                re.search(r"REQUIREMENT_JSON: (.*)\nPROTECTED_JSON", user).group(1)
+            )
+            placeholders = json.loads(
+                re.search(r"PROTECTED_JSON: (.*)\nCANDIDATE_ROUND", user).group(1)
+            )
+            addition = requirement
+            for placeholder in placeholders:
+                first = addition.find(placeholder)
+                assert first >= 0
+                prefix_end = first + len(placeholder)
+                addition = (
+                    addition[:prefix_end]
+                    + addition[prefix_end:].replace(placeholder, "that section")
+                )
             return Completion(
-                json.dumps({"addition": requirement, "placement": "after"}),
+                json.dumps({"addition": addition, "placement": "after"}),
                 {"purpose": purpose},
             )
         if purpose == "behavior_judge":
@@ -422,7 +436,8 @@ def test_semantic_parse_retries_with_validation_feedback() -> None:
 
     model_fixture = RetryModel()
     markdown = (ROOT / "examples/code_review/SKILL.md").read_text()
-    nodes, audit = parse_semantic_nodes(markdown, model_fixture)
+    skill_ir, audit = parse_skill_ir(markdown, model_fixture)
+    nodes = list(skill_ir.nodes)
     assert nodes
     assert model_fixture.parse_calls == 2
     assert audit["parse_attempts"] == 2
@@ -451,7 +466,8 @@ def test_semantic_parse_anchors_word_equivalent_quote_to_exact_source() -> None:
             return Completion(json.dumps(payload), completion.audit)
 
     markdown = (ROOT / "examples/code_review/SKILL.md").read_text()
-    nodes, audit = parse_semantic_nodes(markdown, WhitespaceVariantModel())
+    skill_ir, audit = parse_skill_ir(markdown, WhitespaceVariantModel())
+    nodes = list(skill_ir.nodes)
     example = next(node for node in nodes if node.kind == "example")
     assert example.quote in markdown
     assert "\n\n" in example.quote
@@ -489,7 +505,8 @@ def test_semantic_parse_filters_invalid_candidates_without_losing_valid_nodes() 
             return Completion(json.dumps(payload), completion.audit)
 
     markdown = (ROOT / "examples/code_review/SKILL.md").read_text()
-    nodes, audit = parse_semantic_nodes(markdown, MixedCandidateModel())
+    skill_ir, audit = parse_skill_ir(markdown, MixedCandidateModel())
+    nodes = list(skill_ir.nodes)
     assert nodes
     assert audit["parse_attempts"] == 1
     assert audit["node_rejections"][0]["node_id"] == "short"
@@ -524,7 +541,8 @@ def test_semantic_parse_retries_partial_candidate_selections() -> None:
 
     markdown = (ROOT / "examples/code_review/SKILL.md").read_text()
     model_fixture = PartialCandidateModel()
-    nodes, audit = parse_semantic_nodes(markdown, model_fixture)
+    skill_ir, audit = parse_skill_ir(markdown, model_fixture)
+    nodes = list(skill_ir.nodes)
     assert nodes
     assert model_fixture.parse_calls == 2
     assert audit["parse_attempts"] == 2
@@ -1416,14 +1434,14 @@ def test_end_to_end_core_contract(tmp_path: Path) -> None:
     assert "five scalar keys" not in delivery
     assert "```yaml" not in delivery
     audit = json.loads((package / "owner_audit/audit.json").read_text())
-    for obsolete_anchor in (
+    for disallowed_public_phrase in (
         "The substantive output remains unchanged",
         "Only when the request contains all three exact phrases",
         "Only then",
         "The matching note reads",
         "do not append it otherwise",
     ):
-        assert obsolete_anchor not in delivery
+        assert disallowed_public_phrase not in delivery
     assert all(value in delivery for value in audit["capsule_profile"].values())
     assert len(set(audit["selected_node_kinds"])) == 4
     assert "example" in audit["selected_node_kinds"]
@@ -3455,8 +3473,11 @@ def test_candidate_surface_requires_all_active_cues_in_the_guard_definition() ->
         )
 
 
-def test_build_discards_model_injected_public_protocol(tmp_path: Path) -> None:
+def test_build_fails_closed_when_model_injects_public_protocol(tmp_path: Path) -> None:
     class ProtocolInjectingModel(ContractModelFixture):
+        def __init__(self) -> None:
+            self.fusion_calls = 0
+
         def complete(self, system, user, *, purpose, temperature=0.0, max_tokens=4096):
             completion = super().complete(
                 system,
@@ -3467,6 +3488,7 @@ def test_build_discards_model_injected_public_protocol(tmp_path: Path) -> None:
             )
             if purpose != "carrier_fusion":
                 return completion
+            self.fusion_calls += 1
             payload = json.loads(completion.text)
             payload["addition"] += (
                 "\nUse this 5-field record for buyer 16 under WF/742 and its code-word.\n"
@@ -3477,21 +3499,22 @@ def test_build_discards_model_injected_public_protocol(tmp_path: Path) -> None:
             return Completion(json.dumps(payload), completion.audit)
 
     package = tmp_path / "package"
-    build_package(
-        ROOT / "examples/code_review/SKILL.md",
-        package,
-        skill_id="code_review",
-        buyer_id="buyer_3",
-        config=config("t" * 32),
-        normal_queries=ROOT / "examples/code_review/normal_queries.json",
-        model=ProtocolInjectingModel(),
-    )
-    delivery = (package / "buyer_delivery/SKILL.md").read_text()
-    assert "WF/742" not in delivery
-    assert "5-field" not in delivery
-    assert "| decision | slots |" not in delivery
-    audit = json.loads((package / "owner_audit/audit.json").read_text())
-    assert all(item["fallback_used"] for item in audit["fusion"])
+    model_fixture = ProtocolInjectingModel()
+    with pytest.raises(
+        RuntimeError,
+        match="carrier fusion failed template validation after 3 attempts",
+    ):
+        build_package(
+            ROOT / "examples/code_review/SKILL.md",
+            package,
+            skill_id="code_review",
+            buyer_id="buyer_3",
+            config=config("t" * 32),
+            normal_queries=ROOT / "examples/code_review/normal_queries.json",
+            model=model_fixture,
+        )
+    assert model_fixture.fusion_calls == 3
+    assert not package.exists()
 
 
 def test_all_public_key_derived_apis_reject_invalid_owner_keys() -> None:

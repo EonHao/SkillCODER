@@ -381,7 +381,7 @@ def test_owner_can_be_supported_while_buyer_is_unattributed(tmp_path: Path) -> N
         )
 
 
-def test_core_v2_probe_rejects_an_authenticated_manifestless_package(
+def test_probe_rejects_an_authenticated_package_without_delivery_manifest(
     tmp_path: Path,
 ) -> None:
     owner_key = "m" * 32

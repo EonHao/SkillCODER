@@ -639,13 +639,6 @@ def parse_skill_ir(markdown: str, model: LanguageModel) -> tuple[SkillIR, dict[s
     )
 
 
-def parse_semantic_nodes(markdown: str, model: LanguageModel) -> tuple[list[SemanticNode], dict[str, object]]:
-    """Compatibility wrapper for callers that only consume carrier nodes."""
-
-    skill_ir, audit = parse_skill_ir(markdown, model)
-    return list(skill_ir.nodes), audit
-
-
 def replace_exact(markdown: str, replacements: list[tuple[str, str]]) -> str:
     """Replace disjoint carrier spans resolved against the immutable source document."""
 

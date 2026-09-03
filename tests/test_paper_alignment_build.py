@@ -214,13 +214,13 @@ def test_carriers_protect_only_key_selected_semantic_values() -> None:
         for requirement, _ in requirements
     ) == 1
     rendered = "\n".join(requirement for requirement, _ in requirements)
-    for obsolete in (
+    for disallowed_public_phrase in (
         "The substantive output remains unchanged",
         "Only then",
         "The matching note reads",
         "do not append it otherwise",
     ):
-        assert obsolete not in rendered
+        assert disallowed_public_phrase not in rendered
 
 
 def test_build_modules_have_no_single_domain_examples() -> None:
