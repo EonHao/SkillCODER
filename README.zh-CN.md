@@ -189,3 +189,14 @@ SkillCODER 源代码及项目原创材料采用 [Apache License 2.0](LICENSE)。
 - ErlebnisW `travel-planner` 遵循 MIT，上游许可证全文随 Skill 保留
 
 各项研究输入的来源仓库、commit、路径和许可证记录见 [`datasets/paper_skills/manifest.json`](datasets/paper_skills/manifest.json)。收录这些文件不会改变其著作权归属或许可证条款。
+
+## 引用
+
+```bibtex
+@inproceedings{huang2026skillcoder,
+  title     = {{SkillCODER}: Towards Auditing and Attribution of Copyright Infringement in {LLM} Agent Skills},
+  author    = {Huang, Enhao and Xia, Chunshu and Li, Yiming and Yang, Yuchen and Yang, Bingrun and Qin, Zhan and Tao, Dacheng and Ren, Kui},
+  booktitle = {Proceedings of the ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  year      = {2026}
+}
+```
