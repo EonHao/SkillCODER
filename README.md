@@ -189,3 +189,14 @@ Third-party Skills under `datasets/paper_skills/real_world/` retain their upstre
 - ErlebnisW `travel-planner` is licensed under MIT; the upstream license text is preserved with the Skill.
 
 Source repositories, commits, paths, and license records are listed in [`datasets/paper_skills/manifest.json`](datasets/paper_skills/manifest.json). Inclusion in the research dataset does not change copyright ownership or license terms.
+
+## Citation
+
+```bibtex
+@inproceedings{huang2026skillcoder,
+  title     = {{SkillCODER}: Towards Auditing and Attribution of Copyright Infringement in {LLM} Agent Skills},
+  author    = {Huang, Enhao and Xia, Chunshu and Li, Yiming and Yang, Yuchen and Yang, Bingrun and Qin, Zhan and Tao, Dacheng and Ren, Kui},
+  booktitle = {Proceedings of the ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  year      = {2026}
+}
+```
